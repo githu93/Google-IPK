@@ -7,7 +7,6 @@ on:
 
 jobs:
   build:
-    # OBRIGATÓRIO: ubuntu-22.04 para não dar erro de pacote
     runs-on: ubuntu-22.04
 
     steps:
@@ -17,7 +16,7 @@ jobs:
       - name: Instalar Motores
         run: |
           sudo apt-get update
-          # Instalando apenas o necessário, sem 'qt5-default'
+          # Mudamos aqui para o robô não procurar o pacote que não existe
           sudo apt-get install -y qtbase5-dev qt5-qmake build-essential
 
       - name: Ferramentas LG
