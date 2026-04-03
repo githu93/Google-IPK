@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    # Esta linha obriga o GitHub a usar o sistema estável para a LG
+    # Esta linha obriga o GitHub a usar o sistema que funciona com a LG
     runs-on: ubuntu-22.04
 
     steps:
@@ -17,7 +17,7 @@ jobs:
       - name: Preparando o Computador do GitHub
         run: |
           sudo apt-get update
-          # Instalamos os motores reais um por um, sem usar o nome proibido
+          # Instalamos os motores reais um por um sem usar o nome proibido
           sudo apt-get install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qtdeclarative5-dev qtwebengine5-dev build-essential
 
       - name: Instalando Ferramentas da LG (WebOS CLI)
@@ -33,7 +33,7 @@ jobs:
       - name: Criando o Pacote .IPK Final
         run: |
           mkdir -p build
-          # Empacota o binário para a sua TV
+          # Empacota o binário nativo para a sua TV
           ares-package . --out ./build
 
       - name: Salvar o Arquivo para o Paulo Baixar
