@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    # Forçamos o 22.04 que é o mais estável para LG
+    # Mudamos para o 22.04 para garantir compatibilidade
     runs-on: ubuntu-22.04
 
     steps:
@@ -17,7 +17,7 @@ jobs:
       - name: Preparando o Computador do GitHub
         run: |
           sudo apt-get update
-          # Instalamos os componentes reais sem usar o nome "qt5-default"
+          # Instalamos os motores reais um por um sem o nome 'qt5-default'
           sudo apt-get install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qtdeclarative5-dev qtwebengine5-dev build-essential
 
       - name: Instalando Ferramentas da LG (WebOS CLI)
@@ -26,14 +26,13 @@ jobs:
 
       - name: Compilando o Motor C++ (Nativo)
         run: |
-          # Comando para usar o motor Qt5 no sistema
+          # Forçamos o uso do Qt5 que instalamos acima
           qmake -qt=qt5
           make
 
       - name: Criando o Pacote .IPK Final
         run: |
           mkdir -p build
-          # Empacota o binário nativo para a TV
           ares-package . --out ./build
 
       - name: Salvar o Arquivo para o Paulo Baixar
