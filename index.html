@@ -2,87 +2,89 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Navegador Pro - webOS 23</title>
+    <title>Chrome Gemini Pro</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #1a1a1a; font-family: sans-serif; }
+        body { margin: 0; background: #202124; font-family: sans-serif; overflow: hidden; }
         
-        /* BARRA SUPERIOR (ABAS) */
-        #tab-bar { background: #000; display: flex; align-items: center; padding: 5px; border-bottom: 1px solid #333; }
-        .tab { background: #333; color: #fff; padding: 8px 15px; border-radius: 8px 8px 0 0; font-size: 12px; margin-right: 5px; }
-        .btn-plus { background: #444; color: #fff; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; }
+        /* BARRA SUPERIOR IGUAL AO CHROME */
+        #nav-bar { 
+            position: fixed; top: 0; width: 100%; height: 50px; 
+            background: #202124; display: flex; align-items: center; 
+            padding: 0 10px; border-bottom: 1px solid #3c4043; z-index: 1000;
+        }
 
-        /* NAVEGADOR (IFRAME) */
-        #conteudo { width: 100%; height: calc(100% - 85px); border: none; background: #fff; }
+        .btn { background: none; border: none; padding: 8px; cursor: pointer; border-radius: 50%; display: flex; align-items: center; }
+        .btn:active { background: rgba(255,255,255,0.1); }
+        .icon { fill: #f1f3f4; width: 22px; height: 22px; }
 
-        /* BARRA DE BOTÕES (IGUAL AO PRINT) */
-        #nav-controls { position: fixed; bottom: 0; width: 100%; height: 50px; background: rgba(20,20,20,0.95); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #333; }
-        .nav-icon { color: #888; font-size: 24px; cursor: pointer; background: none; border: none; }
-        .nav-icon.active { color: #fff; }
+        #address-bar { 
+            flex-grow: 1; background: #1a1a1a; border: none; 
+            border-radius: 20px; padding: 8px 15px; color: #fff; 
+            margin: 0 10px; outline: none; font-size: 14px;
+        }
 
         /* BOLINHA GEMINI */
-        #gemini-btn { position: fixed; bottom: 70px; right: 20px; width: 50px; height: 50px; background: linear-gradient(45deg, #4285f4, #9b72f3); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; cursor: pointer; box-shadow: 0 0 15px rgba(0,0,0,0.5); z-index: 1000; border: 2px solid #fff; }
-        
-        /* INTERFACE DA IA */
-        #ia-box { position: fixed; bottom: 130px; right: 20px; width: 300px; background: #222; border: 1px solid #4285f4; border-radius: 15px; padding: 15px; display: none; z-index: 1001; }
-        #ia-input { width: 100%; padding: 10px; border-radius: 5px; border: none; margin-bottom: 10px; }
+        #gemini { 
+            width: 35px; height: 35px; background: linear-gradient(135deg, #4285f4, #9b72f3); 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            color: white; font-weight: bold; cursor: pointer; border: 2px solid #fff;
+        }
+
+        /* O SITE (GOOGLE) */
+        #content { width: 100%; height: calc(100vh - 50px); margin-top: 50px; border: none; background: #fff; }
     </style>
 </head>
 <body>
 
-    <div id="tab-bar">
-        <div class="tab">🌐 Nova guia ×</div>
-        <button class="btn-plus" onclick="novaGuia()">+</button>
+    <div id="nav-bar">
+        <!-- SETA VOLTAR -->
+        <button class="btn" onclick="voltar()">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"/></svg>
+        </button>
+        <!-- SETA SEGUINTE -->
+        <button class="btn" onclick="avancar()">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z"/></svg>
+        </button>
+        <!-- RECARREGAR -->
+        <button class="btn" onclick="recarregar()">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"/></svg>
+        </button>
+
+        <input type="text" id="address-bar" placeholder="Pesquisar no Google ou digitar URL" value="https://www.google.com">
+        
+        <div id="gemini" onclick="falar('Como posso ajudar?')">G</div>
     </div>
 
-    <iframe id="conteudo" src="https://www.google.com/webhp?igu=1"></iframe>
-
-    <div id="nav-controls">
-        <button class="nav-icon active" onclick="voltar()">⬅</button>
-        <button class="nav-icon active" onclick="avancar()">➡</button>
-        <button class="nav-icon active" onclick="recarregar()">↻</button>
-        <button class="nav-icon" style="font-size: 30px;">⏏</button>
-        <button class="nav-icon">❐</button>
-    </div>
-
-    <div id="gemini-btn" onclick="toggleIA()">G</div>
-
-    <div id="ia-box" id="painel">
-        <h4 style="margin:0 0 10px 0; color:#fff;">Assistente Gemini</h4>
-        <input type="text" id="ia-input" placeholder="Fale o problema do site...">
-        <button onclick="enviarIA()" style="width:100%; padding:10px; background:#4285f4; color:#fff; border:none; border-radius:5px;">Injetar Correção</button>
-    </div>
+    <!-- O GOOGLE VAI CARREGAR AQUI DENTRO -->
+    <iframe id="content" src="https://www.google.com/webhp?igu=1"></iframe>
 
     <script>
-        const KEY = "AIzaSyBh_JjoG8K2EKJqf2AAD3zUEd1MCO7GpCQ";
-        const iframe = document.getElementById('conteudo');
+        const iframe = document.getElementById('content');
 
+        function falar(t) {
+            window.speechSynthesis.cancel();
+            const m = new SpeechSynthesisUtterance(t);
+            m.lang = "pt-BR";
+            window.speechSynthesis.speak(m);
+        }
+
+        // Funções das Setas
         function voltar() { window.history.back(); }
         function avancar() { window.history.forward(); }
         function recarregar() { iframe.src = iframe.src; }
-        function novaGuia() { iframe.src = "https://www.google.com"; }
 
-        function toggleIA() {
-            const box = document.getElementById('ia-box');
-            box.style.display = box.style.display === 'block' ? 'none' : 'block';
-        }
+        // Abrir URL ao apertar Enter
+        document.getElementById('address-bar').addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') {
+                let url = e.target.value;
+                if(!url.includes('http')) url = 'https://' + url;
+                iframe.src = url;
+                falar("Navegando para " + url);
+            }
+        });
 
-        async function enviarIA() {
-            const prompt = document.getElementById('ia-input').value;
-            if(!prompt) return;
-            
-            // Aqui a IA conserta os erros do navegador
-            try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: "O usuário está no webOS 23 e relatou este erro no navegador: " + prompt + ". Responda o que você vai fazer para injetar a solução." }] }] })
-                });
-                const data = await res.json();
-                alert("IA AGINDO: " + data.candidates[0].content.parts[0].text);
-                document.getElementById('ia-input').value = "";
-                toggleIA();
-            } catch(e) { alert("Erro ao conectar com a IA."); }
-        }
+        // Inicialização
+        window.onclick = () => { if(!window.v){ falar("Google Chrome ativado na TV LG."); window.v=1; } };
     </script>
 </body>
 </html>
