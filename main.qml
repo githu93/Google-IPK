@@ -1,36 +1,41 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtWebView 1.1
+name: Gerar Instalador IPK para TV
 
-ApplicationWindow {
-    visible: true
-    width: 1920
-    height: 1080
-    title: "Google"
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
 
-    // Barra de busca simples no topo
-    TextField {
-        id: urlInput
-        width: parent.width
-        height: 60
-        placeholderText: "Digite a URL ou pesquise no Google..."
-        onAccepted: webView.url = "https://www.google.com/search?q=" + text
-    }
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-    // O motor do navegador
-    WebView {
-        id: webView
-        anchors.top: urlInput.bottom
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        url: "https://www.google.com"
-        
-        // Configuração de performance: Limpa memória ao trocar de página
-        onLoadingChanged: {
-            if (loadRequest.status === WebView.LoadStartedStatus) {
-                console.log("Limpando lixo de memória para nova página...")
-            }
-        }
-    }
-}
+    steps:
+      - name: Baixando o Código do Paulo
+        uses: actions/checkout@v4
+
+      - name: Preparando o Computador do GitHub (Qt + Motores)
+        run: |
+          sudo apt-get update
+          # Instalando as ferramentas do Qt5 individualmente
+          sudo apt-get install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qtdeclarative5-dev qtwebengine5-dev build-essential
+
+      - name: Instalando Ferramentas da LG (WebOS CLI)
+        run: |
+          sudo npm install -g @webos-tools/cli
+
+      - name: Compilando o Motor C++ (Nativo)
+        run: |
+          # Usamos o qmake do Qt5 explicitamente
+          qmake -qt=qt5
+          make
+
+      - name: Criando o Pacote .IPK Final
+        run: |
+          mkdir -p build
+          ares-package . --out ./build
+
+      - name: Salvar o Arquivo para o Paulo Baixar
+        uses: actions/upload-artifact@v4
+        with:
+          name: Instalador-Google-TV
+          path: ./build/*.ipk
