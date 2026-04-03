@@ -1,11 +1,14 @@
 {
-    "id": "com.google.paulo",
+    "id": "com.paulo.ia.app",
     "version": "1.0.0",
     "vendor": "Paulo",
     "type": "web",
     "main": "index.html",
-    "title": "Google",
+    "title": "Navegador IA",
     "icon": "icon.png",
-    "largeIcon": "largeIcon.png",
-    "bgImage": "backgroundImage.png"
+    "permissions": [
+        "internet",
+        "audio.output",
+        "media.tts"
+    ]
 }
