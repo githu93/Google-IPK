@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Baixando o Código do Paulo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Preparando o Computador do GitHub (Qt + Motores)
         run: |
@@ -33,7 +33,7 @@ jobs:
           ares-package . --out ./build
 
       - name: Salvar o Arquivo para o Paulo Baixar
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Instalador-Google-TV
           path: ./build/*.ipk
