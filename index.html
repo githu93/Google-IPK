@@ -2,75 +2,86 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>IA NAVIGATOR - STOP ERROR</title>
+    <title>Navegador Pro - webOS 23</title>
     <style>
-        body { margin: 0; background: #000; color: #00ff00; font-family: sans-serif; text-align: center; padding-top: 50px; }
-        .container { border: 2px solid #00ff00; margin: 20px; padding: 20px; border-radius: 15px; }
-        input { width: 80%; padding: 15px; background: #111; border: 1px solid #00ff00; color: #fff; font-size: 20px; }
-        button { margin-top: 20px; padding: 15px 40px; background: #00ff00; color: #000; font-weight: bold; border: none; cursor: pointer; }
-        #status { margin-top: 20px; color: yellow; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #1a1a1a; font-family: sans-serif; }
+        
+        /* BARRA SUPERIOR (ABAS) */
+        #tab-bar { background: #000; display: flex; align-items: center; padding: 5px; border-bottom: 1px solid #333; }
+        .tab { background: #333; color: #fff; padding: 8px 15px; border-radius: 8px 8px 0 0; font-size: 12px; margin-right: 5px; }
+        .btn-plus { background: #444; color: #fff; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; }
+
+        /* NAVEGADOR (IFRAME) */
+        #conteudo { width: 100%; height: calc(100% - 85px); border: none; background: #fff; }
+
+        /* BARRA DE BOTÕES (IGUAL AO PRINT) */
+        #nav-controls { position: fixed; bottom: 0; width: 100%; height: 50px; background: rgba(20,20,20,0.95); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #333; }
+        .nav-icon { color: #888; font-size: 24px; cursor: pointer; background: none; border: none; }
+        .nav-icon.active { color: #fff; }
+
+        /* BOLINHA GEMINI */
+        #gemini-btn { position: fixed; bottom: 70px; right: 20px; width: 50px; height: 50px; background: linear-gradient(45deg, #4285f4, #9b72f3); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; cursor: pointer; box-shadow: 0 0 15px rgba(0,0,0,0.5); z-index: 1000; border: 2px solid #fff; }
+        
+        /* INTERFACE DA IA */
+        #ia-box { position: fixed; bottom: 130px; right: 20px; width: 300px; background: #222; border: 1px solid #4285f4; border-radius: 15px; padding: 15px; display: none; z-index: 1001; }
+        #ia-input { width: 100%; padding: 10px; border-radius: 5px; border: none; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>IA WEBOS 23 - MODO SEGURO</h1>
-        <p>Digite um site (ex: google.com) ou uma pergunta.</p>
-        <input type="text" id="campo" placeholder="O que deseja fazer?">
-        <br>
-        <button onclick="processar()">EXECUTAR</button>
-        <div id="status">SISTEMA PARADO - AGUARDANDO VOCÊ</div>
+    <div id="tab-bar">
+        <div class="tab">🌐 Nova guia ×</div>
+        <button class="btn-plus" onclick="novaGuia()">+</button>
+    </div>
+
+    <iframe id="conteudo" src="https://www.google.com/webhp?igu=1"></iframe>
+
+    <div id="nav-controls">
+        <button class="nav-icon active" onclick="voltar()">⬅</button>
+        <button class="nav-icon active" onclick="avancar()">➡</button>
+        <button class="nav-icon active" onclick="recarregar()">↻</button>
+        <button class="nav-icon" style="font-size: 30px;">⏏</button>
+        <button class="nav-icon">❐</button>
+    </div>
+
+    <div id="gemini-btn" onclick="toggleIA()">G</div>
+
+    <div id="ia-box" id="painel">
+        <h4 style="margin:0 0 10px 0; color:#fff;">Assistente Gemini</h4>
+        <input type="text" id="ia-input" placeholder="Fale o problema do site...">
+        <button onclick="enviarIA()" style="width:100%; padding:10px; background:#4285f4; color:#fff; border:none; border-radius:5px;">Injetar Correção</button>
     </div>
 
     <script>
         const KEY = "AIzaSyBh_JjoG8K2EKJqf2AAD3zUEd1MCO7GpCQ";
+        const iframe = document.getElementById('conteudo');
 
-        function falar(t) {
-            window.speechSynthesis.cancel();
-            const m = new SpeechSynthesisUtterance(t);
-            m.lang = "pt-BR";
-            window.speechSynthesis.speak(m);
+        function voltar() { window.history.back(); }
+        function avancar() { window.history.forward(); }
+        function recarregar() { iframe.src = iframe.src; }
+        function novaGuia() { iframe.src = "https://www.google.com"; }
+
+        function toggleIA() {
+            const box = document.getElementById('ia-box');
+            box.style.display = box.style.display === 'block' ? 'none' : 'block';
         }
 
-        // Libera a voz no primeiro toque
-        window.onclick = () => { if(!window.v){ falar("Modo seguro ativado."); window.v=1; } };
-
-        async function processar() {
-            const input = document.getElementById('campo');
-            const status = document.getElementById('status');
-            const texto = input.value.toLowerCase();
-
-            if(!texto) return;
-
-            // REGRA 1: Se for site, pula a IA (ECONOMIZA PLANO E EVITA ERRO -27)
-            if(texto.includes(".com") || texto.includes(".br") || texto.includes("www")) {
-                status.innerText = "ABRINDO SITE EM TELA CHEIA...";
-                falar("Abrindo site solicitado");
-                setTimeout(() => {
-                    // Isso mata o Erro -27 porque sai do app e vai pro navegador
-                    window.location.href = texto.startsWith("http") ? texto : "https://" + texto;
-                }, 1000);
-                return;
-            }
-
-            // REGRA 2: Só gasta API se for uma pergunta real
-            status.innerText = "CONSULTANDO IA...";
+        async function enviarIA() {
+            const prompt = document.getElementById('ia-input').value;
+            if(!prompt) return;
+            
+            // Aqui a IA conserta os erros do navegador
             try {
-                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: "Responda curto: " + texto }] }] })
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: "O usuário está no webOS 23 e relatou este erro no navegador: " + prompt + ". Responda o que você vai fazer para injetar a solução." }] }] })
                 });
-                const d = await r.json();
-                const resposta = d.candidates[0].content.parts[0].text;
-                
-                falar(resposta);
-                alert("IA diz: " + resposta);
-                status.innerText = "PRONTO.";
-            } catch (e) {
-                status.innerText = "ERRO DE CONEXÃO.";
-                falar("Erro ao conectar.");
-            }
+                const data = await res.json();
+                alert("IA AGINDO: " + data.candidates[0].content.parts[0].text);
+                document.getElementById('ia-input').value = "";
+                toggleIA();
+            } catch(e) { alert("Erro ao conectar com a IA."); }
         }
     </script>
 </body>
