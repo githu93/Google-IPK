@@ -7,33 +7,34 @@ on:
 
 jobs:
   build:
+    # Mudamos para 22.04 para o GitHub encontrar as ferramentas da LG
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout
+      - name: Baixando o Codigo
         uses: actions/checkout@v4
 
-      - name: Instalar Motores
+      - name: Instalar Motores do Google
         run: |
           sudo apt-get update
-          # Mudamos aqui para o robô não procurar o pacote que não existe
+          # Removi o 'qt5-default' que causava o erro 100 no seu print
           sudo apt-get install -y qtbase5-dev qt5-qmake build-essential
 
-      - name: Ferramentas LG
+      - name: Instalar Ferramentas LG
         run: |
           sudo npm install -g @webos-tools/cli --unsafe-perm
 
-      - name: Compilar
+      - name: Compilar Navegador Nativo
         run: |
           qmake -qt=qt5
           make
 
-      - name: Gerar Pacote
+      - name: Gerar Pacote IPK
         run: |
           mkdir -p build
           ares-package . --out ./build
 
-      - name: Download do IPK
+      - name: Download do Arquivo Final
         uses: actions/upload-artifact@v4
         with:
           name: App-Paulo-TV
