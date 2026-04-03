@@ -20,8 +20,11 @@ jobs:
       - name: Gerar Pacote IPK
         run: |
           mkdir -p build
-          # O comando ares-package vai ler o seu appinfo.json novo
-          ares-package . --out ./build --no-minify
+          # Baixa uma imagem provisoria de icone para o robo parar de dar erro 255!
+          wget -qO icon.png https://github.com/fluidicon.png
+          
+          # Agora ele gera o pacote sem reclamar
+          ares-package . --out ./build
 
       - name: Download do Arquivo Final
         uses: actions/upload-artifact@v4
