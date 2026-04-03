@@ -7,7 +7,8 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Mudamos para o 20.04 porque ele tem os pacotes Qt5 que precisamos
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Baixando o Código do Paulo
@@ -16,8 +17,8 @@ jobs:
       - name: Preparando o Computador do GitHub (Qt + Motores)
         run: |
           sudo apt-get update
-          # Instalando as ferramentas do Qt5 individualmente
-          sudo apt-get install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qtdeclarative5-dev qtwebengine5-dev build-essential
+          # No Ubuntu 20.04, o qt5-default ainda funciona perfeitamente
+          sudo apt-get install -y qt5-default qtdeclarative5-dev qtwebengine5-dev build-essential
 
       - name: Instalando Ferramentas da LG (WebOS CLI)
         run: |
@@ -25,8 +26,7 @@ jobs:
 
       - name: Compilando o Motor C++ (Nativo)
         run: |
-          # Usamos o qmake do Qt5 explicitamente
-          qmake -qt=qt5
+          qmake
           make
 
       - name: Criando o Pacote .IPK Final
