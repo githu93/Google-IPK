@@ -17,13 +17,16 @@ jobs:
         run: |
           sudo npm install -g @webos-tools/cli --unsafe-perm
 
-      - name: Gerar Pacote IPK
+      - name: Criando Imagens Faltantes e Gerando IPK
         run: |
           mkdir -p build
-          # Baixa uma imagem provisoria de icone para o robo parar de dar erro 255!
-          wget -qO icon.png https://github.com/fluidicon.png
           
-          # Agora ele gera o pacote sem reclamar
+          # Baixa imagens provisórias para o robô não reclamar de falta de arquivos
+          wget -qO icon.png https://github.com/fluidicon.png
+          cp icon.png largeIcon.png
+          cp icon.png backgroundImage.png
+          
+          # Gera o pacote IPK agora com todos os arquivos presentes
           ares-package . --out ./build
 
       - name: Download do Arquivo Final
