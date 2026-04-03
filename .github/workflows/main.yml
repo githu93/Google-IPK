@@ -13,26 +13,15 @@ jobs:
       - name: Baixando o Codigo
         uses: actions/checkout@v4
 
-      - name: Instalar Motores do Google
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y qtbase5-dev qt5-qmake build-essential
-
       - name: Instalar Ferramentas LG
         run: |
           sudo npm install -g @webos-tools/cli --unsafe-perm
 
-      - name: Compilar Navegador Nativo
-        run: |
-          # Mostra os arquivos pro Paulo ver o que tem na pasta
-          ls -R
-          # Tenta rodar o qmake no modo correto
-          qmake -o Makefile *.pro || qmake -o Makefile
-          make
-
       - name: Gerar Pacote IPK
         run: |
+          # Cria a pasta de saída
           mkdir -p build
+          # O comando ares-package empacota os arquivos HTML/JS/JSON que estão na raiz
           ares-package . --out ./build
 
       - name: Download do Arquivo Final
