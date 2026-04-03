@@ -1,29 +1,31 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Navegador Paulo TV</title>
-    <style>
-        body, html { 
-            margin: 0; padding: 0; width: 100%; height: 100%; 
-            overflow: hidden; background-color: white; 
-        }
-        /* O segredo: vamos usar a tela toda para o Google */
-        #browser {
-            width: 100%; height: 100%; border: none;
-        }
-    </style>
-</head>
-<body>
-    <!-- Carrega o Google de um jeito que aceita buscas -->
-    <iframe id="browser" src="https://www.google.com/webhp?igu=1"></iframe>
+name: Build IPK Paulo
 
-    <script>
-        // Esse script ajuda a evitar o erro -27 em alguns links
-        var frame = document.getElementById('browser');
-        frame.onload = function() {
-            console.log("Navegador pronto!");
-        };
-    </script>
-</body>
-</html>
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Baixando o Codigo
+        uses: actions/checkout@v4
+
+      - name: Instalar Ferramentas LG
+        run: |
+          sudo npm install -g @webos-tools/cli --unsafe-perm
+
+      - name: Gerar Pacote
+        run: |
+          mkdir -p build
+          wget -qO icon.png https://github.com/fluidicon.png
+          cp icon.png largeIcon.png
+          cp icon.png backgroundImage.png
+          ares-package . --out ./build
+
+      - name: Download Final
+        uses: actions/upload-artifact@v4
+        with:
+          name: App-Paulo-TV
+          path: ./build/*.ipk
