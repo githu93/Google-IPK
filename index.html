@@ -2,78 +2,74 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>IA NAVIGATOR 2026</title>
+    <title>IA NAVIGATOR - STOP ERROR</title>
     <style>
-        body { margin: 0; background: #050505; color: #00ff00; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        #topo { padding: 25px; border-bottom: 2px solid #00ff00; background: #111; box-shadow: 0 5px 20px rgba(0,255,0,0.2); }
-        input { width: 75%; padding: 15px; background: #1a1a1a; border: 1px solid #00ff00; color: #00ff00; border-radius: 10px; font-size: 20px; outline: none; }
-        button { padding: 15px 30px; background: #00ff00; color: #000; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; font-size: 18px; margin-left: 10px; }
-        #feedback { margin-top: 15px; color: yellow; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
-        iframe { flex-grow: 1; border: none; background: white; width: 100%; }
+        body { margin: 0; background: #000; color: #00ff00; font-family: sans-serif; text-align: center; padding-top: 50px; }
+        .container { border: 2px solid #00ff00; margin: 20px; padding: 20px; border-radius: 15px; }
+        input { width: 80%; padding: 15px; background: #111; border: 1px solid #00ff00; color: #fff; font-size: 20px; }
+        button { margin-top: 20px; padding: 15px 40px; background: #00ff00; color: #000; font-weight: bold; border: none; cursor: pointer; }
+        #status { margin-top: 20px; color: yellow; }
     </style>
 </head>
 <body>
 
-    <div id="topo">
-        <input type="text" id="comando" placeholder="Digite um site ou fale com a IA...">
-        <button onclick="executar()">EXECUTAR</button>
-        <div id="feedback" id="status">SISTEMA WEBOS 23 PRONTO</div>
+    <div class="container">
+        <h1>IA WEBOS 23 - MODO SEGURO</h1>
+        <p>Digite um site (ex: google.com) ou uma pergunta.</p>
+        <input type="text" id="campo" placeholder="O que deseja fazer?">
+        <br>
+        <button onclick="processar()">EXECUTAR</button>
+        <div id="status">SISTEMA PARADO - AGUARDANDO VOCÊ</div>
     </div>
 
-    <iframe id="tela" src="https://www.google.com/webhp?igu=1"></iframe>
-
     <script>
-        const API_KEY = "AIzaSyBh_JjoG8K2EKJqf2AAD3zUEd1MCO7GpCQ";
-        const tela = document.getElementById('tela');
-        const status = document.getElementById('status');
+        const KEY = "AIzaSyBh_JjoG8K2EKJqf2AAD3zUEd1MCO7GpCQ";
 
-        // VOZ PARA WEBOS 23 (Precisa de interação inicial)
-        function falar(texto) {
+        function falar(t) {
             window.speechSynthesis.cancel();
-            const msg = new SpeechSynthesisUtterance(texto);
-            msg.lang = 'pt-BR';
-            msg.volume = 1.0;
-            window.speechSynthesis.speak(msg);
+            const m = new SpeechSynthesisUtterance(t);
+            m.lang = "pt-BR";
+            window.speechSynthesis.speak(m);
         }
 
-        // Boas-vindas ao primeiro toque
-        window.addEventListener('mousedown', () => {
-            if(!window.inicializado) {
-                falar("Seja bem vindo ao navegador otimizado web os vinte e três");
-                window.inicializado = true;
-            }
-        }, { once: true });
+        // Libera a voz no primeiro toque
+        window.onclick = () => { if(!window.v){ falar("Modo seguro ativado."); window.v=1; } };
 
-        async function executar() {
-            const input = document.getElementById('comando');
-            const valor = input.value.toLowerCase();
-            if(!valor) return;
+        async function processar() {
+            const input = document.getElementById('campo');
+            const status = document.getElementById('status');
+            const texto = input.value.toLowerCase();
 
-            // Se for site, abre direto para evitar Erro -27
-            if(valor.includes(".com") || valor.includes(".br") || valor.includes("http")) {
-                const url = valor.startsWith('http') ? valor : 'https://' + valor;
+            if(!texto) return;
+
+            // REGRA 1: Se for site, pula a IA (ECONOMIZA PLANO E EVITA ERRO -27)
+            if(texto.includes(".com") || texto.includes(".br") || texto.includes("www")) {
+                status.innerText = "ABRINDO SITE EM TELA CHEIA...";
                 falar("Abrindo site solicitado");
-                // No webOS 23, mudar o SRC do iframe pode dar erro -27. 
-                // Se der erro, vamos abrir em tela cheia:
-                window.location.href = url; 
+                setTimeout(() => {
+                    // Isso mata o Erro -27 porque sai do app e vai pro navegador
+                    window.location.href = texto.startsWith("http") ? texto : "https://" + texto;
+                }, 1000);
                 return;
             }
 
-            // IA - Chamada compatível com o novo WebEngine da LG
+            // REGRA 2: Só gasta API se for uma pergunta real
+            status.innerText = "CONSULTANDO IA...";
             try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: "Responda em uma frase curta: " + valor }] }] })
+                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: "Responda curto: " + texto }] }] })
                 });
-
-                const data = await res.json();
-                const resposta = data.candidates[0].content.parts[0].text;
+                const d = await r.json();
+                const resposta = d.candidates[0].content.parts[0].text;
                 
                 falar(resposta);
-                alert("IA: " + resposta);
+                alert("IA diz: " + resposta);
+                status.innerText = "PRONTO.";
             } catch (e) {
-                falar("Erro de conexão. Verifique se a TV aceita conexões externas.");
+                status.innerText = "ERRO DE CONEXÃO.";
+                falar("Erro ao conectar.");
             }
         }
     </script>
