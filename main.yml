@@ -1,4 +1,4 @@
-name: Gerar Instalador IPK para TV
+name: Gerar Instalador IPK para TV (Pasta Tools)
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    # Esta linha obriga o uso do sistema que aceita as ferramentas da LG
+    # Usamos o 22.04 porque ele aceita melhor ferramentas externas
     runs-on: ubuntu-22.04
 
     steps:
@@ -17,23 +17,32 @@ jobs:
       - name: Preparando o Computador do GitHub
         run: |
           sudo apt-get update
-          # Instalamos os componentes reais um por um, sem usar o nome que dá erro
-          sudo apt-get install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qtdeclarative5-dev qtwebengine5-dev build-essential
+          # Instalamos os motores de base (Qt5) individualmente
+          sudo apt-get install -y qtbase5-dev qt5-qmake qtbase5-dev-tools qtdeclarative5-dev qtwebengine5-dev build-essential
+
+      - name: Configurando a Pasta Tools do Paulo
+        run: |
+          # Cria a pasta caso você ainda não tenha criado no GitHub
+          mkdir -p tools
+          # Dá permissão para o robô ler tudo que estiver lá dentro
+          chmod -R +x tools/
+          # Avisa o sistema para procurar programas dentro da sua pasta 'tools'
+          echo "$(pwd)/tools" >> $GITHUB_PATH
 
       - name: Instalando Ferramentas da LG (WebOS CLI)
         run: |
-          sudo npm install -g @webos-tools/cli
+          # Tentativa de instalação forçada do comando 'ares-package'
+          sudo npm install -g @webos-tools/cli --unsafe-perm
 
       - name: Compilando o Motor C++ (Nativo)
         run: |
-          # Força o uso do motor Qt5 instalado
           qmake -qt=qt5
           make
 
       - name: Criando o Pacote .IPK Final
         run: |
           mkdir -p build
-          # Comando para fabricar o instalador da TV
+          # O robô tenta usar o ares-package (do sistema ou da sua pasta tools)
           ares-package . --out ./build
 
       - name: Salvar o Arquivo para o Paulo Baixar
