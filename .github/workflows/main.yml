@@ -24,12 +24,14 @@ jobs:
 
       - name: Compilar Navegador Nativo
         run: |
-          qmake -qt=qt5
+          # O *.pro faz o robô achar seu arquivo de projeto sozinho
+          qmake *.pro -qt=qt5
           make
 
       - name: Gerar Pacote IPK
         run: |
           mkdir -p build
+          # Comando para fabricar o instalador da TV
           ares-package . --out ./build
 
       - name: Download do Arquivo Final
