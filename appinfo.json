@@ -1,0 +1,16 @@
+{
+    "id": "com.paulo.navegador.native",
+    "version": "1.0.0",
+    "vendor": "PauloDev",
+    "type": "native",
+    "main": "navegador_bin",
+    "title": "Google Native Browser",
+    "icon": "icon.png",
+    "permissions": [
+        "internet",
+        "nativeMessaging"
+    ],
+    "requiredPermissions": [
+        "network.operation"
+    ]
+}
