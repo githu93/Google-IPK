@@ -2,75 +2,73 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Navegador IA Paulo - Interativo</title>
+    <title>Navegador IA Paulo - Voz Ativa</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; font-family: 'Segoe UI', sans-serif; }
-        #interface-ia { position: fixed; top: 0; width: 100%; background: rgba(20, 20, 20, 0.9); padding: 15px; z-index: 10000; border-bottom: 2px solid #00ff00; display: flex; gap: 10px; align-items: center; }
-        #pergunta { flex-grow: 1; padding: 10px; border-radius: 5px; border: 1px solid #00ff00; background: #1a1a1a; color: #00ff00; outline: none; }
-        #btn-enviar { padding: 10px 20px; background: #00ff00; color: black; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        #navegador { width: 100%; height: calc(100% - 70px); margin-top: 70px; border: none; background: white; }
-        #status-voz { color: #00ff00; font-size: 10px; margin-left: 10px; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; font-family: sans-serif; }
+        #interface-ia { position: fixed; top: 0; width: 100%; background: rgba(15, 15, 15, 0.95); padding: 15px; z-index: 10000; border-bottom: 2px solid #00ff00; display: flex; gap: 10px; align-items: center; box-shadow: 0 4px 15px rgba(0,255,0,0.3); }
+        #pergunta { flex-grow: 1; padding: 12px; border-radius: 8px; border: 1px solid #00ff00; background: #000; color: #00ff00; font-size: 16px; }
+        #btn-enviar { padding: 12px 25px; background: #00ff00; color: #000; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        #navegador { width: 100%; height: calc(100% - 80px); margin-top: 80px; border: none; background: white; }
     </style>
 </head>
 <body>
 
     <div id="interface-ia">
-        <input type="text" id="pergunta" placeholder="Fale o problema para a IA injetar o código...">
+        <input type="text" id="pergunta" placeholder="Fale com a IA ou relate um erro...">
         <button id="btn-enviar" onclick="perguntarIA()">ENVIAR</button>
-        <div id="status-voz">🔊 IA Ativa</div>
     </div>
 
     <iframe id="navegador" src="https://www.google.com/webhp?igu=1"></iframe>
 
     <script>
         const CHAVE = "AIzaSyBh_JjoG8K2EKJqf2AAD3zUEd1MCO7GpCQ";
-        const PROJETO = "72336407577";
-        const frame = document.getElementById('navegador');
+        const input = document.getElementById('pergunta');
 
-        // 1. VOZ DE BOAS-VINDAS
-        window.onload = function() {
-            const mensagem = new SpeechSynthesisUtterance("Seja bem-vindo ao navegador otimizado webOS");
+        // FUNÇÃO PARA A IA FALAR
+        function falar(texto) {
+            const mensagem = new SpeechSynthesisUtterance(texto);
             mensagem.lang = "pt-BR";
+            mensagem.rate = 1.1; // Um pouco mais rápido para parecer inteligente
             window.speechSynthesis.speak(mensagem);
-        };
+        }
 
-        // 2. FUNÇÃO PARA A IA INJETAR CÓDIGOS
+        // BOAS-VINDAS (Ativa ao clicar em qualquer lugar da tela na primeira vez)
+        window.addEventListener('click', () => {
+            if (!window.jaFalou) {
+                falar("Seja bem-vindo ao navegador otimizado web OS. Sistema carregado e pronto para uso.");
+                window.jaFalou = true;
+            }
+        }, { once: true });
+
         async function perguntarIA() {
-            const input = document.getElementById('pergunta');
             const texto = input.value;
             if(!texto) return;
 
-            input.placeholder = "IA pensando...";
+            input.placeholder = "IA Pensando...";
             input.value = "";
 
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${CHAVE}`;
             
-            const prompt = {
-                contents: [{
-                    parts: [{ text: `Você é uma IA de suporte para LG TV (Projeto ${PROJETO}). O usuário disse: "${texto}". Responda APENAS com um comando JavaScript curto para executar no navegador (ex: mudar URL ou estilo) ou uma orientação de 1 frase.` }]
-                }]
-            };
-
             try {
-                const response = await fetch(url, { method: 'POST', body: JSON.stringify(prompt) });
-                const data = await response.json();
-                const respostaIA = data.candidates[0].content.parts[0].text;
+                const response = await fetch(url, { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: `Você é uma IA de suporte em uma LG TV. Responda de forma curta e amigável. Se for um erro, diga que resolveu. Pergunta do usuário: ${texto}` }] }] })
+                });
 
-                // TENTA EXECUTAR O CÓDIGO QUE A IA MANDOU (INJEÇÃO)
-                try {
-                    if(respostaIA.includes('window') || respostaIA.includes('document')) {
-                        eval(respostaIA); // Injeta o código
-                    }
-                    const vozResposta = new SpeechSynthesisUtterance("Comando processado");
-                    vozResposta.lang = "pt-BR";
-                    window.speechSynthesis.speak(vozResposta);
-                } catch(e) {
-                    console.log("IA deu uma dica verbal");
-                }
+                const data = await response.json();
+                const respostaFinal = data.candidates[0].content.parts[0].text;
+
+                // A IA FALA A RESPOSTA
+                falar(respostaFinal);
                 
-                alert("IA diz: " + respostaIA);
+                // MOSTRA NA TELA TAMBÉM
+                input.placeholder = "IA respondeu!";
+                setTimeout(() => { input.placeholder = "Fale o problema..."; }, 3000);
+
             } catch (e) {
-                alert("Erro ao falar com o cérebro da IA.");
+                falar("Erro de conexão com o servidor. Tente novamente.");
+                input.placeholder = "Erro de conexão!";
             }
         }
     </script>
