@@ -1,4 +1,4 @@
-name: Gerar Instalador IPK para TV
+name: Build IPK Paulo
 
 on:
   push:
@@ -7,33 +7,33 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
-      - name: Baixando o Código do Paulo
+      - name: Baixando o Codigo
         uses: actions/checkout@v4
 
-      - name: Preparando o Computador do GitHub (Qt + Motores)
+      - name: Instalar Motores do Google
         run: |
           sudo apt-get update
-          sudo apt-get install -y qt5-default qtdeclarative5-dev qtwebengine5-dev build-essential
+          sudo apt-get install -y qtbase5-dev qt5-qmake build-essential
 
-      - name: Instalando Ferramentas da LG (WebOS CLI)
+      - name: Instalar Ferramentas LG
         run: |
-          sudo npm install -g @webos-tools/cli
+          sudo npm install -g @webos-tools/cli --unsafe-perm
 
-      - name: Compilando o Motor C++ (Nativo)
+      - name: Compilar Navegador Nativo
         run: |
-          qmake
+          qmake -qt=qt5
           make
 
-      - name: Criando o Pacote .IPK Final
+      - name: Gerar Pacote IPK
         run: |
-          # O comando 'ares-package' é o que fabrica o instalador da TV
+          mkdir -p build
           ares-package . --out ./build
 
-      - name: Salvar o Arquivo para o Paulo Baixar
+      - name: Download do Arquivo Final
         uses: actions/upload-artifact@v4
         with:
-          name: Instalador-Google-TV
+          name: App-Paulo-TV
           path: ./build/*.ipk
