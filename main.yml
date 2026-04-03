@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    # Forçamos uma versão que aceita os comandos de compilação da LG
+    # Esta linha é a mais importante: força o sistema Ubuntu 22.04
     runs-on: ubuntu-22.04
 
     steps:
@@ -17,7 +17,7 @@ jobs:
       - name: Preparando o Computador do GitHub
         run: |
           sudo apt-get update
-          # Instalamos os componentes um por um para não dar erro de "not available"
+          # Instalamos os pacotes um por um sem usar o 'qt5-default'
           sudo apt-get install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qtdeclarative5-dev qtwebengine5-dev build-essential
 
       - name: Instalando Ferramentas da LG (WebOS CLI)
@@ -26,7 +26,7 @@ jobs:
 
       - name: Compilando o Motor C++ (Nativo)
         run: |
-          # Comando específico para usar o motor Qt5 no sistema Linux
+          # Comando para usar o motor Qt5 no Ubuntu 22.04
           qmake -qt=qt5
           make
 
