@@ -19,10 +19,9 @@ jobs:
 
       - name: Gerar Pacote IPK
         run: |
-          # Cria a pasta de saída
           mkdir -p build
-          # O comando ares-package empacota os arquivos HTML/JS/JSON que estão na raiz
-          ares-package . --out ./build
+          # O comando ares-package vai ler o seu appinfo.json novo
+          ares-package . --out ./build --no-minify
 
       - name: Download do Arquivo Final
         uses: actions/upload-artifact@v4
