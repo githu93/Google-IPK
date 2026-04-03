@@ -7,7 +7,6 @@ on:
 
 jobs:
   build:
-    # Mudamos para 22.04 para o GitHub encontrar as ferramentas da LG
     runs-on: ubuntu-22.04
 
     steps:
@@ -17,7 +16,6 @@ jobs:
       - name: Instalar Motores do Google
         run: |
           sudo apt-get update
-          # Removi o 'qt5-default' que causava o erro 100 no seu print
           sudo apt-get install -y qtbase5-dev qt5-qmake build-essential
 
       - name: Instalar Ferramentas LG
